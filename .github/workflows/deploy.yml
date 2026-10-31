@@ -78,21 +78,23 @@ jobs:
             echo "tag=${{ github.sha }}" >> $GITHUB_OUTPUT
           fi
 
-      - name: Prepare environment file from GitHub Secret
+      - name: Base64 encode .env for safe transfer
+        id: env_encode
         env:
           APP_ENV: ${{ secrets.APP_ENV_FILE }}
         run: |
-          printf "%s\n" "$APP_ENV" > .env
+          B64_ENV=$(printf '%s' "$APP_ENV" | base64 -w 0)
+          echo "b64_env=${B64_ENV}" >> $GITHUB_OUTPUT
 
-      - name: Copy deployment files to GCP Instance
+      - name: Copy docker-compose.yml to GCP Instance
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.GCP_VM_HOST }}
           username: ${{ secrets.GCP_VM_USER }}
           key: ${{ secrets.GCP_VM_SSH_KEY }}
           port: ${{ secrets.GCP_VM_SSH_PORT || 22 }}
-          source: "docker-compose.yml,.env"
-          target: ${{ secrets.GCP_DEPLOY_PATH || '~/bodhixtech' }}
+          source: "docker-compose.yml"
+          target: ${{ secrets.GCP_DEPLOY_PATH || 'bodhixtech' }}
 
       - name: Execute Deployment on GCP Instance via SSH
         uses: appleboy/ssh-action@v1.0.3
@@ -100,20 +102,31 @@ jobs:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
           DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
           IMAGE_TAG: ${{ steps.target.outputs.tag }}
-          DEPLOY_PATH: ${{ secrets.GCP_DEPLOY_PATH || '~/bodhixtech' }}
+          DEPLOY_PATH: ${{ secrets.GCP_DEPLOY_PATH || 'bodhixtech' }}
+          B64_ENV: ${{ steps.env_encode.outputs.b64_env }}
         with:
           host: ${{ secrets.GCP_VM_HOST }}
           username: ${{ secrets.GCP_VM_USER }}
           key: ${{ secrets.GCP_VM_SSH_KEY }}
           port: ${{ secrets.GCP_VM_SSH_PORT || 22 }}
-          envs: DOCKERHUB_USERNAME,DOCKERHUB_PASSWORD,IMAGE_TAG,DEPLOY_PATH
+          envs: DOCKERHUB_USERNAME,DOCKERHUB_PASSWORD,IMAGE_TAG,DEPLOY_PATH,B64_ENV
           script: |
             set -e
             echo "==> Deploying version tag: ${IMAGE_TAG}"
-            mkdir -p ${DEPLOY_PATH}
-            cd ${DEPLOY_PATH}
 
-            # Secure environment file permissions
+            # Resolve absolute deployment directory
+            if [[ "${DEPLOY_PATH}" = /* ]]; then
+              TARGET_DIR="${DEPLOY_PATH}"
+            else
+              TARGET_DIR="${HOME}/${DEPLOY_PATH}"
+            fi
+
+            mkdir -p "${TARGET_DIR}"
+            cd "${TARGET_DIR}"
+
+            # Generate .env directly in the deployment directory from secret
+            echo "==> Writing .env file..."
+            echo "${B64_ENV}" | base64 -d > .env
             chmod 600 .env
 
             # Authenticate with Docker Hub to pull images
