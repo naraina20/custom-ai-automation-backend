@@ -1,5 +1,5 @@
 """
-OAuth Configuration Constants and Defaults for NexusAI Gateway.
+OAuth Configuration Constants and Defaults for BodhixTech Gateway.
 
 Centralized definitions for OAuth providers (Google, GitHub), API endpoints,
 default scopes, grant types, timeouts, and frontend communication channels.

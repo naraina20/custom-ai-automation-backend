@@ -566,7 +566,7 @@ def tool_planner_node(state: AgentState) -> Dict[str, Any]:
 
     # Retrieve exact schemas and tool-specific instructions dynamically for the selected tools
     tools_schemas_str = ToolCatalogManager.get_tools_schemas_for_planner(selected_tools)
-    company = getattr(settings, 'COMPANY_NAME', 'NexusAI')
+    company = getattr(settings, 'COMPANY_NAME', 'BodhixTech')
 
     sheet_context_section = ""
     if "write_sheet" in selected_tools:
@@ -1503,7 +1503,7 @@ class GraphEngine:
             # If user provided refinement feedback, adjust plans using LLM
             if feedback and feedback.strip():
                 try:
-                    company = getattr(settings, 'COMPANY_NAME', 'NexusAI')
+                    company = getattr(settings, 'COMPANY_NAME', 'BodhixTech')
                     refinement_prompt = f"""You are the Master Agent Plan Refiner for {company}.
 The user has reviewed the prepared execution plans and provided the following feedback:
 

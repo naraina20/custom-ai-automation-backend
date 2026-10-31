@@ -341,8 +341,8 @@ class EmailSenderTool:
         if not recipients:
             raise GeneralToolsError("Recipient email address (to_email) is required.")
 
-        company = getattr(settings, 'COMPANY_NAME', 'NexusAI')
-        sender = from_email or getattr(settings, 'DEFAULT_FROM_EMAIL', f'{company} <support@nexusai.local>')
+        company = getattr(settings, 'COMPANY_NAME', 'BodhixTech')
+        sender = from_email or getattr(settings, 'DEFAULT_FROM_EMAIL', f'{company} <support@bodhixtech.local>')
 
         AppLogger.debug("EmailSenderTool", f"Attempting SMTP dispatch to: {recipients} | Subject: '{subject}' | From: {sender}")
 
@@ -405,7 +405,7 @@ class EmailSenderTool:
     @classmethod
     def execute_plan_item(cls, item: Dict[str, Any], context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """Dynamically executes a single send_email plan item."""
-        company = getattr(settings, 'COMPANY_NAME', 'NexusAI')
+        company = getattr(settings, 'COMPANY_NAME', 'BodhixTech')
         to_email = item.get("to_email")
         subject = item.get("subject", f"{company} Automated Notice")
         body = item.get("body", "")
@@ -1097,7 +1097,7 @@ class ToolCatalogManager:
         available_tools_catalog = cls.get_tools_catalog_for_reasoning()
         available_tool_names = cls.get_all_tool_names()
 
-        company = getattr(settings, 'COMPANY_NAME', 'NexusAI')
+        company = getattr(settings, 'COMPANY_NAME', 'BodhixTech')
         eval_prompt = f"""You are the Master Agent Tool Selector for {company}.
 The execution engine has already received and ingested the inbound webhook trigger / user request payload.
 Our toolbox contains the following General Action Tools to process the data and perform actions:
@@ -1181,7 +1181,7 @@ Return ONLY a valid JSON object matching this exact schema:
         reason = decision.get("reason", "")
 
         if not can_fulfill or not tools:
-            company = getattr(settings, 'COMPANY_NAME', 'NexusAI')
+            company = getattr(settings, 'COMPANY_NAME', 'BodhixTech')
             support_email = getattr(settings, 'COMPANY_SUPPORT_EMAIL', 'narainad308@gmail.com')
             user_info = f"Client: {client_name or 'Anonymous'} ({client_email or 'No email provided'})"
 

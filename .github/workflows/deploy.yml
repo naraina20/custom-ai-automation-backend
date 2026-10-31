@@ -1,0 +1,144 @@
+name: Build, Tag & Deploy Backend to Google Cloud
+
+on:
+  push:
+    branches:
+      - main
+  # Enables manual trigger & instant rollback from GitHub Actions UI
+  workflow_dispatch:
+    inputs:
+      rollback_sha:
+        description: "Git Commit SHA to deploy or rollback to (leave blank for latest commit)"
+        required: false
+        default: ""
+
+jobs:
+  # ============================================================================
+  # 1. Build and Push Backend Docker Image tagged with Git SHA and latest
+  # ============================================================================
+  build-and-push:
+    name: Build & Push Backend Image
+    runs-on: ubuntu-latest
+    # Skip build step if this is a manual rollback to an existing previous SHA
+    if: "${{ github.event.inputs.rollback_sha == '' || github.event_name == 'push' }}"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+      - name: Compute Short Git SHA
+        id: vars
+        run: echo "short_sha=$(echo ${{ github.sha }} | cut -c1-7)" >> $GITHUB_OUTPUT
+
+      - name: Build and push Backend Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ secrets.DOCKERHUB_USERNAME }}/bodhixtech-backend:${{ github.sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/bodhixtech-backend:${{ steps.vars.outputs.short_sha }}
+            ${{ secrets.DOCKERHUB_USERNAME }}/bodhixtech-backend:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # ============================================================================
+  # 2. Deploy to Google Cloud Compute Instance via SSH
+  # ============================================================================
+  deploy:
+    name: Deploy to GCP VM Instance
+    runs-on: ubuntu-latest
+    needs: [build-and-push]
+    environment: prod
+    # Allow deployment if build succeeds or if manual rollback was requested
+    if: always() && (needs.build-and-push.result == 'success' || github.event.inputs.rollback_sha != '')
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Resolve Target Git SHA Tag
+        id: target
+        run: |
+          if [ -n "${{ github.event.inputs.rollback_sha }}" ]; then
+            echo "Selected Rollback SHA: ${{ github.event.inputs.rollback_sha }}"
+            echo "tag=${{ github.event.inputs.rollback_sha }}" >> $GITHUB_OUTPUT
+          else
+            echo "Selected Current Commit SHA: ${{ github.sha }}"
+            echo "tag=${{ github.sha }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Prepare environment file from GitHub Secret
+        env:
+          APP_ENV: ${{ secrets.APP_ENV_FILE }}
+        run: |
+          printf "%s\n" "$APP_ENV" > .env
+
+      - name: Copy deployment files to GCP Instance
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.GCP_VM_HOST }}
+          username: ${{ secrets.GCP_VM_USER }}
+          key: ${{ secrets.GCP_VM_SSH_KEY }}
+          port: ${{ secrets.GCP_VM_SSH_PORT || 22 }}
+          source: "docker-compose.yml,.env"
+          target: ${{ secrets.GCP_DEPLOY_PATH || '~/bodhixtech' }}
+
+      - name: Execute Deployment on GCP Instance via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+          IMAGE_TAG: ${{ steps.target.outputs.tag }}
+          DEPLOY_PATH: ${{ secrets.GCP_DEPLOY_PATH || '~/bodhixtech' }}
+        with:
+          host: ${{ secrets.GCP_VM_HOST }}
+          username: ${{ secrets.GCP_VM_USER }}
+          key: ${{ secrets.GCP_VM_SSH_KEY }}
+          port: ${{ secrets.GCP_VM_SSH_PORT || 22 }}
+          envs: DOCKERHUB_USERNAME,DOCKERHUB_PASSWORD,IMAGE_TAG,DEPLOY_PATH
+          script: |
+            set -e
+            echo "==> Deploying version tag: ${IMAGE_TAG}"
+            mkdir -p ${DEPLOY_PATH}
+            cd ${DEPLOY_PATH}
+
+            # Secure environment file permissions
+            chmod 600 .env
+
+            # Authenticate with Docker Hub to pull images
+            echo "${DOCKERHUB_PASSWORD}" | docker login -u "${DOCKERHUB_USERNAME}" --password-stdin
+
+            # Persist deployment configuration
+            export DOCKERHUB_USERNAME="${DOCKERHUB_USERNAME}"
+            export IMAGE_TAG="${IMAGE_TAG}"
+
+            # Pull images matching the Git SHA tag
+            echo "==> Pulling Docker images (${IMAGE_TAG})..."
+            docker compose pull backend
+
+            # Start updated containers
+            echo "==> Starting backend container..."
+            docker compose up -d --no-deps --remove-orphans backend
+
+            # Run Django migrations inside backend container
+            echo "==> Running database migrations..."
+            docker compose exec -T backend uv run python manage.py migrate --noinput
+
+            # Clean up old unused images to save VM disk space
+            echo "==> Pruning stale Docker images..."
+            docker image prune -f
+
+            echo "==> Deployment status:"
+            docker compose ps
+

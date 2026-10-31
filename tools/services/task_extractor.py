@@ -65,7 +65,7 @@ class TaskExtractorService:
         feedback: Optional[str] = None,
         current_tasks: Optional[List[str]] = None,
     ) -> Dict[str, Any]:
-        company = getattr(settings, 'COMPANY_NAME', 'NexusAI')
+        company = getattr(settings, 'COMPANY_NAME', 'BodhixTech')
         rules_text = cls.get_rules_summary()
 
         if feedback and feedback.strip():

@@ -97,8 +97,8 @@ class NotificationService:
 
         # 2. HTML Email Notification
         try:
-            company_name = getattr(settings, 'COMPANY_NAME', 'NexusAI')
-            support_email = getattr(settings, 'COMPANY_SUPPORT_EMAIL', 'support@nexusai.local')
+            company_name = getattr(settings, 'COMPANY_NAME', 'BodhixTech')
+            support_email = getattr(settings, 'COMPANY_SUPPORT_EMAIL', 'support@bodhixtech.local')
             target_email = user_email
             if not target_email and user_id:
                 try:
@@ -159,8 +159,8 @@ class NotificationService:
         Sends email alert when an inbound webhook fails due to invalid/expired OAuth tokens.
         """
         try:
-            company_name = getattr(settings, 'COMPANY_NAME', 'NexusAI')
-            support_email = getattr(settings, 'COMPANY_SUPPORT_EMAIL', 'support@nexusai.local')
+            company_name = getattr(settings, 'COMPANY_NAME', 'BodhixTech')
+            support_email = getattr(settings, 'COMPANY_SUPPORT_EMAIL', 'support@bodhixtech.local')
             target_email = user_email or getattr(settings, 'EMAIL_HOST_USER', None) or support_email
 
             if not reauth_url:
@@ -213,8 +213,8 @@ class NotificationService:
         if not failed_items:
             return
 
-        company_name = getattr(settings, 'COMPANY_NAME', 'NexusAI')
-        support_email = getattr(settings, 'COMPANY_SUPPORT_EMAIL', 'support@nexusai.local')
+        company_name = getattr(settings, 'COMPANY_NAME', 'BodhixTech')
+        support_email = getattr(settings, 'COMPANY_SUPPORT_EMAIL', 'support@bodhixtech.local')
         target_email = user_email or getattr(settings, 'EMAIL_HOST_USER', None) or support_email
 
         # 1. Real-time WebSocket notification
@@ -284,8 +284,8 @@ class NotificationService:
         Dispatches real-time WebSocket notification and optional email when an asynchronous
         webhook background execution finishes (completed or failed).
         """
-        company_name = getattr(settings, 'COMPANY_NAME', 'NexusAI')
-        support_email = getattr(settings, 'COMPANY_SUPPORT_EMAIL', 'support@nexusai.local')
+        company_name = getattr(settings, 'COMPANY_NAME', 'BodhixTech')
+        support_email = getattr(settings, 'COMPANY_SUPPORT_EMAIL', 'support@bodhixtech.local')
         target_email = user_email or getattr(settings, 'EMAIL_HOST_USER', None) or support_email
 
         clean_err = cls.sanitize_error_detail(error_message, max_len=150)

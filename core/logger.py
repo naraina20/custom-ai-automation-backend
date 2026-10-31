@@ -5,7 +5,7 @@ from typing import Optional
 
 class StandardAppFormatter(logging.Formatter):
     """
-    Standard Custom Logger Formatter for NexusAI.
+    Standard Custom Logger Formatter for BodhixTech.
     
     Behavior:
     - For ERROR / CRITICAL:

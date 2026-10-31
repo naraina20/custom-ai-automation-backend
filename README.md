@@ -1,6 +1,6 @@
-# NexusAI Backend — Agent Workflow & Custom Tools Engine
+# BodhixTech Backend — Agent Workflow & Custom Tools Engine
 
-The backend service for **NexusAI**, powering custom AI tool definitions, LangGraph multi-step agent reasoning, asynchronous webhook ingestion, Human-in-the-Loop (HITL) gatekeeping, and real-time WebSocket communications.
+The backend service for **BodhixTech**, powering custom AI tool definitions, LangGraph multi-step agent reasoning, asynchronous webhook ingestion, Human-in-the-Loop (HITL) gatekeeping, and real-time WebSocket communications.
 
 ---
 
@@ -102,7 +102,7 @@ DEBUG=True
 DATABASE_URL=postgresql://user:password@host:port/dbname
 
 # Brand & Email Configuration
-COMPANY_NAME=NexusAI
+COMPANY_NAME=BodhixTech
 COMPANY_SUPPORT_EMAIL=support@yourdomain.com
 EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
 EMAIL_HOST=smtp.your-email-provider.com
@@ -154,4 +154,31 @@ uv run daphne -b 0.0.0.0 -p 8000 core.asgi:application
 ```
 
 The API will be available at `http://127.0.0.1:8000/`.
+
+### 6. Health Check Endpoint
+
+Monitor container and service health:
+- `GET /health/` or `GET /api/health/`
+  - Returns `200 OK` when the service and database are operational.
+  - Returns `503 Service Unavailable` if database connectivity fails.
+
+---
+
+## 🐳 Docker Deployment
+
+Build and run the production image using Docker:
+
+```bash
+cd backend
+
+# Build Docker image
+docker build -t bodhixtech-backend .
+
+# Run container with environment file
+docker run -d \
+  -p 8000:8000 \
+  --env-file .env \
+  --name bodhixtech-backend \
+  bodhixtech-backend
+```
 

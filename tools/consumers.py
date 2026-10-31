@@ -24,7 +24,7 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         logger.info("WebSocket connected for user: %s (channel: %s)", self.user_id, self.channel_name)
 
         # Send initial confirmation handshake
-        company = getattr(settings, 'COMPANY_NAME', 'NexusAI')
+        company = getattr(settings, 'COMPANY_NAME', 'BodhixTech')
         await self.send(text_data=json.dumps({
             "type": "CONNECTION_ESTABLISHED",
             "user_id": self.user_id,

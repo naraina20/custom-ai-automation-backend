@@ -314,7 +314,7 @@ class GoogleExecutorService:
                         or deployer_email
                     )
 
-                company = getattr(settings, 'COMPANY_NAME', 'NexusAI')
+                company = getattr(settings, 'COMPANY_NAME', 'BodhixTech')
                 if not subj:
                     tool_title = context.get('tool_title') or (context.get('tool').title if context.get('tool') else None) or f'{company} Assistant'
                     subj = f"Notification from {tool_title}"

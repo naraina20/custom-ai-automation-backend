@@ -1,6 +1,6 @@
 """
 Django settings for core project.
-NexusAI Agent Systems - Agentic Tool Gateway & Tax Engine
+BodhixTech Agent Systems - Agentic Tool Gateway & Tax Engine
 """
 
 from pathlib import Path
@@ -218,15 +218,15 @@ GOOGLE_DEVELOPER_KEY = config('GOOGLE_DEVELOPER_KEY', default=config('GEMINI_API
 
 
 # Brand & Email Configuration
-COMPANY_NAME = config('COMPANY_NAME', default="NexusAI")
-COMPANY_SUPPORT_EMAIL = config('COMPANY_SUPPORT_EMAIL', default="support@nexusai.local")
+COMPANY_NAME = config('COMPANY_NAME', default="BodhixTech")
+COMPANY_SUPPORT_EMAIL = config('COMPANY_SUPPORT_EMAIL', default="support@bodhixtech.local")
 EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
 EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
 EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
 EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
 EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='NexusAI <support@nexusai.local>')
+DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='BodhixTech <support@bodhixtech.local>')
 
 # Default LLM Providers & Keys
 GEMINI_API_KEY = config('GEMINI_API_KEY', default='')

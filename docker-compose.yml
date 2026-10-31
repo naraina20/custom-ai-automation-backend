@@ -1,0 +1,22 @@
+services:
+  backend:
+    image: ${DOCKERHUB_USERNAME:-bodhixtech}/bodhixtech-backend:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bodhixtech-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - PORT=8000
+      - PYTHONUNBUFFERED=1
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+

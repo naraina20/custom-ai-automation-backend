@@ -12,7 +12,7 @@ standard_logger = logging.getLogger("tools")
 
 class AppLogger:
     """
-    Centralized Custom Logger for NexusAI Agent Systems.
+    Centralized Custom Logger for BodhixTech Agent Systems.
 
     Rules:
     1. ERRORS are ALWAYS logged to console/loggers, irrespective of DEBUG flag.

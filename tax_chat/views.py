@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_indian_tax_system_prompt() -> str:
-    company = getattr(settings, 'COMPANY_NAME', 'NexusAI')
+    company = getattr(settings, 'COMPANY_NAME', 'BodhixTech')
     return f"""You are {company} Tax & GST Intelligence, an authoritative, expert Indian Chartered Accountant and Tax Specialist AI powered by fine-tuned Qwen3-1.7B (PEFT/LoRA adapter: narainad/qwen3-gst-tax-adapter).
 
 Your domain specialization strictly covers Indian Goods and Services Tax (GST) Compliance, Sections, Clauses, and Factual Accounting Guidance:
