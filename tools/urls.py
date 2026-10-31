@@ -1,0 +1,85 @@
+from django.urls import path
+from .views import (
+    GenerateSchemaView,
+    ImproveDescriptionView,
+    ExtractToolTasksView,
+    CreateToolView,
+    MarketplaceToolsView,
+    MyToolsView,
+    GoogleCapabilitiesView,
+    SharedUserAssetView,
+    UpdateCustomToolView,
+)
+from .views_agent import (
+    AgentRunView,
+    AgentDecisionView,
+    AgentHITLInfoView,
+)
+from .views_webhooks import (
+    WebhookIngestView,
+    UserToolDeployView,
+    WebhookJobStatusView,
+    FailedWebhookInfoView,
+    FailedWebhookRetryView,
+    FailedWebhookFileCheckView,
+    FailedWebhookFileSelectView,
+)
+from .views_oauth import (
+    GoogleOAuthInitView,
+    GoogleOAuthCallbackView,
+    GoogleOAuthCodeExchangeView,
+    GoogleOAuthStatusView,
+    GoogleOAuthRevokeView,
+    GooglePickerConfigView,
+)
+from .views_sheets import (
+    SheetsInfoView,
+    SheetsSampleView,
+    SheetsGenerateView,
+    SheetsWriteView,
+)
+
+urlpatterns = [
+    # Google OAuth Consent & Token Management
+    path('oauth/google/init/', GoogleOAuthInitView.as_view(), name='google-oauth-init'),
+    path('oauth/google/callback/', GoogleOAuthCallbackView.as_view(), name='google-oauth-callback'),
+    path('oauth/google/exchange-code/', GoogleOAuthCodeExchangeView.as_view(), name='google-oauth-exchange-code'),
+    path('oauth/google/status/', GoogleOAuthStatusView.as_view(), name='google-oauth-status'),
+    path('oauth/google/revoke/', GoogleOAuthRevokeView.as_view(), name='google-oauth-revoke'),
+    path('oauth/google/picker-config/', GooglePickerConfigView.as_view(), name='google-picker-config'),
+
+    # Milestone 1: Tool CRUD & Schema Generator & AI Description Improver & Task Extractor
+    path('tools/extract-tasks/', ExtractToolTasksView.as_view(), name='tools-extract-tasks'),
+    path('tools/generate-schema/', GenerateSchemaView.as_view(), name='tools-generate-schema'),
+    path('tools/improve-description/', ImproveDescriptionView.as_view(), name='tools-improve-description'),
+    path('tools/create/', CreateToolView.as_view(), name='tools-create'),
+    path('tools/marketplace/', MarketplaceToolsView.as_view(), name='tools-marketplace'),
+    path('tools/my-tools/', MyToolsView.as_view(), name='tools-my-tools'),
+    path('tools/deploy/', UserToolDeployView.as_view(), name='tools-deploy'),
+    path('tools/<int:pk>/', UpdateCustomToolView.as_view(), name='tool-update'),
+
+    # Failed Webhook OAuth Reauth & Recovery Endpoints
+    path('tools/failed-webhook/<int:job_id>/', FailedWebhookInfoView.as_view(), name='failed-webhook-info'),
+    path('tools/failed-webhook/<int:job_id>/retry/', FailedWebhookRetryView.as_view(), name='failed-webhook-retry'),
+    path('tools/failed-webhook/<int:job_id>/check-file-access/', FailedWebhookFileCheckView.as_view(), name='failed-webhook-check-file-access'),
+    path('tools/failed-webhook/<int:job_id>/select-file/', FailedWebhookFileSelectView.as_view(), name='failed-webhook-select-file'),
+
+    # Google Products Capabilities & Shared Asset Quarantine Endpoints
+    path('tools/google-capabilities/', GoogleCapabilitiesView.as_view(), name='google-capabilities'),
+    path('tools/google-assets/', SharedUserAssetView.as_view(), name='google-assets'),
+
+    # Milestone 3: LangGraph Agent & Human-In-The-Loop Execution
+    path('agent/run/', AgentRunView.as_view(), name='agent-run'),
+    path('agent/decision/', AgentDecisionView.as_view(), name='agent-decision'),
+    path('agent/hitl-info/', AgentHITLInfoView.as_view(), name='agent-hitl-info'),
+
+    # Milestone 4: Universal Catch-All Inbound Webhook (supports tool & user secrets)
+    path('webhooks/<uuid:webhook_secret>/', WebhookIngestView.as_view(), name='webhook-ingest'),
+    path('webhooks/jobs/<int:job_id>/', WebhookJobStatusView.as_view(), name='webhook-job-status'),
+
+    # Google Sheets API v4 Endpoints
+    path('sheets/<str:file_id>/info/', SheetsInfoView.as_view(), name='sheets-info'),
+    path('sheets/<str:file_id>/sample/', SheetsSampleView.as_view(), name='sheets-sample'),
+    path('sheets/<str:file_id>/generate/', SheetsGenerateView.as_view(), name='sheets-generate'),
+    path('sheets/<str:file_id>/write/', SheetsWriteView.as_view(), name='sheets-write'),
+]
